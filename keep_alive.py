@@ -27,18 +27,23 @@ def keep_alive():
         if env_url not in urls:
             urls.append(env_url)
 
+    import random
+
     if not urls:
         print("Error: No URLs found. Please check 'links.txt' or set STREAMLIT_URL.")
         return
 
-    print(f"Found {len(urls)} URLs to visit.")
+    # Randomize order to avoid hitting the same app first/last every time
+    random.shuffle(urls)
+    print(f"Found {len(urls)} URLs to visit. Order randomized.")
 
     chrome_options = Options()
-    chrome_options.add_argument("--headless")  # Run in headless mode (no GUI)
-    # Required for running as root in Docker/CI
+    chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
-    # Overcome limited resource problems
     chrome_options.add_argument("--disable-dev-shm-usage")
+    # Add a User-Agent to look like a real browser
+    chrome_options.add_argument(
+        "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
 
     for i, url in enumerate(urls, 1):
         driver = None
@@ -51,8 +56,8 @@ def keep_alive():
             driver.get(url)
 
             # Wait for the page to load
-            print("Waiting 20 seconds for page load...")
-            time.sleep(20)
+            print("Waiting 30 seconds for page load...")
+            time.sleep(30)
 
             title = driver.title
             print(f"Page title: {title}")
@@ -70,9 +75,10 @@ def keep_alive():
                 print("Closing driver...")
                 driver.quit()
 
-        # Small buffer between requests
+        # Buffer between requests
         if i < len(urls):
-            time.sleep(5)
+            print("Waiting 10 seconds before next request...")
+            time.sleep(10)
 
     print("Finished visiting all URLs.")
 
