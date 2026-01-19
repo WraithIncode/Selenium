@@ -1,0 +1,4 @@
+https://mastrategybacktesting.streamlit.app/
+https://marketdataanalyser.streamlit.app/
+https://montecarlosi.streamlit.app/
+https://weightedportfolioanalyser.streamlit.app/
