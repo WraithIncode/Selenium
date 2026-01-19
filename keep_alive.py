@@ -33,7 +33,6 @@ def keep_alive():
 
     print(f"Found {len(urls)} URLs to visit.")
 
-    print("Setting up Chrome options...")
     chrome_options = Options()
     chrome_options.add_argument("--headless")  # Run in headless mode (no GUI)
     # Required for running as root in Docker/CI
@@ -41,32 +40,41 @@ def keep_alive():
     # Overcome limited resource problems
     chrome_options.add_argument("--disable-dev-shm-usage")
 
-    try:
-        print("Initializing WebDriver...")
-        service = Service(ChromeDriverManager().install())
-        driver = webdriver.Chrome(service=service, options=chrome_options)
+    for i, url in enumerate(urls, 1):
+        driver = None
+        try:
+            print(f"[{i}/{len(urls)}] Initializing WebDriver for {url}...")
+            service = Service(ChromeDriverManager().install())
+            driver = webdriver.Chrome(service=service, options=chrome_options)
 
-        for url in urls:
-            try:
-                print(f"Visiting {url}...")
-                driver.get(url)
+            print(f"Visiting {url}...")
+            driver.get(url)
 
-                # Wait for the page to load
-                print("Waiting for page load...")
-                time.sleep(15)
+            # Wait for the page to load
+            print("Waiting 20 seconds for page load...")
+            time.sleep(20)
 
-                print(f"Page title: {driver.title}")
+            title = driver.title
+            print(f"Page title: {title}")
+
+            if "Streamlit" in title or title:
                 print(f"Successfully visited {url}")
+            else:
+                print(f"Warning: Page title seems empty for {url}")
 
-            except Exception as e:
-                print(f"Error visiting {url}: {e}")
+        except Exception as e:
+            print(f"Error visiting {url}: {e}")
 
-        driver.quit()
-        print("Finished visiting all URLs.")
+        finally:
+            if driver:
+                print("Closing driver...")
+                driver.quit()
 
-    except Exception as e:
-        print(f"An error occurred during WebDriver setup: {e}")
-        raise e
+        # Small buffer between requests
+        if i < len(urls):
+            time.sleep(5)
+
+    print("Finished visiting all URLs.")
 
 
 if __name__ == "__main__":
