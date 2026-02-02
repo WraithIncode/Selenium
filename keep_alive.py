@@ -56,7 +56,7 @@ def keep_alive():
             driver.get(url)
 
             # Wait for the page to load
-            print("Waiting 30 seconds for page load...")
+            print("Waiting 10 seconds for page load...")
             time.sleep(10)
 
             title = driver.title
